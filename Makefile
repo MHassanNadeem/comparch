@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-std=c++11
 
-%.o: %.cpp
+%.o: %.cpp %.h
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
 all: cache.o

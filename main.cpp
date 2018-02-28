@@ -6,15 +6,18 @@ int main(){
     printf("My Cache\n");
     printf("==============================\n");
     
-    LRUCache ca(4);
+    LRUCache ca(4, 4);
 
-    ca.refer(1);
-    ca.refer(2);
-    ca.refer(3);
-    ca.refer(1);
-    ca.refer(4);
-    ca.refer(5);
+    ca.add(1);
+    ca.add(2);
+    ca.add(3);
+    ca.add(1);
+    ca.add(4);
+    ca.add(5);
     ca.display();
+    
+    /* Full: 5 4 1 3 */
+    /* Direct: 4 5 2 3 */
 
     return 0;
 }
