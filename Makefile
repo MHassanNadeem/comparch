@@ -9,7 +9,7 @@ all: cache.o
 	
 .PHONY : clean
 clean:
-	rm -rf cache main
+	rm -rf cache main cache.o
 	
 run:
 	./main

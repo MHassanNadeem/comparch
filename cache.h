@@ -2,8 +2,7 @@
 #include <bits/stdc++.h>
 using namespace std;
  
-class LRUCache
-{
+class LRUCache{
     // store keys of cache
     list<int> dq;
  
