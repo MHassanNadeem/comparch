@@ -1,3 +1,6 @@
+#ifndef CACHE_H
+#define CACHE_H
+
 #include <unordered_map>
 #include <bits/stdc++.h>
 #include <stdint.h>
@@ -30,3 +33,5 @@ private:
     int64_t getBlockNumber(int64_t);
     int64_t getBlockAddress(int64_t);
 };
+
+#endif /* CACHE_H */
