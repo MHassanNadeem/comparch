@@ -1,5 +1,6 @@
 #include <unordered_map>
 #include <bits/stdc++.h>
+#include <stdint.h>
 #include "debug.h"
 
 using namespace std;
@@ -14,9 +15,10 @@ class LRUCache{
     int associativity; /* 1 = directly mapped, size = fully associative */
     int numSets; /* number of q = number of sets */
     int blockSize; /* size in bytes */
+    int numBlocks;
     
 public:
-    LRUCache(int, int);
+    LRUCache(int, int, int);
     ~LRUCache();
     
     void add(int);
@@ -25,4 +27,6 @@ public:
     
 private:
     int getSetNumber(int);
+    int getBlockNumber(int);
+    int64_t getBlockAddress(int64_t);
 };

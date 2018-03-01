@@ -1,12 +1,16 @@
 #include "cache.h"
 
-LRUCache::LRUCache(int size, int associativity){
+LRUCache::LRUCache(int size, int blockSize, int associativity){
     this->size = size;
+    this->blockSize = blockSize;
     this->associativity = associativity;
-    this->numSets = size/associativity;
+    this->numBlocks = size/blockSize;
+    this->numSets = numBlocks/associativity;
     
     DBG(size, d);
+    DBG(blockSize, d);
     DBG(associativity, d);
+    DBG(numBlocks, d);
     DBG(numSets, d);
     
     q = new list<int>[numSets];
@@ -17,7 +21,15 @@ LRUCache::~LRUCache(){
 }
 
 int LRUCache::getSetNumber(int x){
-    return x%numSets;
+    return x%(numSets*blockSize);
+}
+
+int LRUCache::getBlockNumber(int x){
+    return x%numBlocks;
+}
+
+int64_t LRUCache::getBlockAddress(int64_t x){
+    return getBlockNumber(x)*blockSize;
 }
 
 bool LRUCache::isPresent(int x){
@@ -27,8 +39,9 @@ bool LRUCache::isPresent(int x){
 /* Refers key x with in the LRU cache */
 void LRUCache::add(int x){
     int setNumber = getSetNumber(x);
+    int blockNumber = getBlockNumber(x);
 
-    if(!isPresent(x)){
+    if(!isPresent(blockNumber)){
         // set is full
         if (q[setNumber].size() == associativity){
             //delete LRU element
@@ -37,12 +50,12 @@ void LRUCache::add(int x){
             map.erase(last);
         }
     }else{
-        q[setNumber].erase(map[x]);
+        q[setNumber].erase(map[blockNumber]);
     }
     
     // update reference
-    q[setNumber].push_front(x);
-    map[x] = q[setNumber].begin();
+    q[setNumber].push_front(blockNumber);
+    map[blockNumber] = q[setNumber].begin();
 }
  
 // display contents of cache

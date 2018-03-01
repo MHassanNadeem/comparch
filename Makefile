@@ -12,4 +12,4 @@ clean:
 	rm -rf cache main cache.o
 	
 run:
-	./main
+	clear && ./main

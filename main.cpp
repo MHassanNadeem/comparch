@@ -6,8 +6,8 @@ int main(){
     printf("My Cache\n");
     printf("==============================\n");
     
-    LRUCache ca(4, 4);
-
+    LRUCache ca(4, 1, 4);
+    
     ca.add(1);
     ca.add(2);
     ca.add(3);
