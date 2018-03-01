@@ -1,6 +1,6 @@
 #include "cache.h"
 
-LRUCache::LRUCache(int size, int blockSize, int associativity){
+LRUCache::LRUCache(int64_t size, int64_t blockSize, int64_t associativity){
     this->size = size;
     this->blockSize = blockSize;
     this->associativity = associativity;
@@ -13,18 +13,18 @@ LRUCache::LRUCache(int size, int blockSize, int associativity){
     DBG(numBlocks, d);
     DBG(numSets, d);
     
-    q = new list<int>[numSets];
+    q = new list<int64_t>[numSets];
 }
 
 LRUCache::~LRUCache(){
     delete [] q;
 }
 
-int LRUCache::getSetNumber(int x){
+int64_t LRUCache::getSetNumber(int64_t x){
     return x%(numSets*blockSize);
 }
 
-int LRUCache::getBlockNumber(int x){
+int64_t LRUCache::getBlockNumber(int64_t x){
     return x%numBlocks;
 }
 
@@ -32,20 +32,20 @@ int64_t LRUCache::getBlockAddress(int64_t x){
     return getBlockNumber(x)*blockSize;
 }
 
-bool LRUCache::isPresent(int x){
+bool LRUCache::isPresent(int64_t x){
     return !(map.find(x) == map.end());
 }
 
 /* Refers key x with in the LRU cache */
-void LRUCache::add(int x){
-    int setNumber = getSetNumber(x);
-    int blockNumber = getBlockNumber(x);
+void LRUCache::add(int64_t x){
+    int64_t setNumber = getSetNumber(x);
+    int64_t blockNumber = getBlockNumber(x);
 
     if(!isPresent(blockNumber)){
         // set is full
         if (q[setNumber].size() == associativity){
             //delete LRU element
-            int last = q[setNumber].back();
+            int64_t last = q[setNumber].back();
             q[setNumber].pop_back();
             map.erase(last);
         }
@@ -60,7 +60,7 @@ void LRUCache::add(int x){
  
 // display contents of cache
 void LRUCache::display(){
-    for(int iSet = 0; iSet<numSets; iSet++){
+    for(int64_t iSet = 0; iSet<numSets; iSet++){
         printf("Set %d: ", iSet);
         for (auto it = q[iSet].begin(); it != q[iSet].end(); it++){
             cout << (*it) << " ";

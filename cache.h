@@ -6,27 +6,27 @@
 using namespace std;
 
 class LRUCache{
-    list<int>* q;
-    unordered_map<int, list<int>::iterator> map;
+    list<int64_t>* q;
+    unordered_map<int64_t, list<int64_t>::iterator> map;
     
-    int size; // Capacity of cache in num of blocks
+    int64_t size; // Capacity of cache in num of blocks
     
     /* Number of blocks per spot = size of q */
-    int associativity; /* 1 = directly mapped, size = fully associative */
-    int numSets; /* number of q = number of sets */
-    int blockSize; /* size in bytes */
-    int numBlocks;
+    int64_t associativity; /* 1 = directly mapped, size = fully associative */
+    int64_t numSets; /* number of q = number of sets */
+    int64_t blockSize; /* size in bytes */
+    int64_t numBlocks;
     
 public:
-    LRUCache(int, int, int);
+    LRUCache(int64_t, int64_t, int64_t);
     ~LRUCache();
     
-    void add(int);
-    bool isPresent(int);
+    void add(int64_t);
+    bool isPresent(int64_t);
     void display();
     
 private:
-    int getSetNumber(int);
-    int getBlockNumber(int);
+    int64_t getSetNumber(int64_t);
+    int64_t getBlockNumber(int64_t);
     int64_t getBlockAddress(int64_t);
 };
