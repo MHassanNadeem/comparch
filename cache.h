@@ -20,10 +20,9 @@ class LRUCache{
     list<CacheBlock>* q;
     unordered_map<int64_t, list<CacheBlock>::iterator> map;
     
-    int64_t size; // Capacity of cache in num of blocks
+    int64_t size; /* Capacity of cache in num of blocks */
     
-    /* Number of blocks per set = size of q */
-    int64_t associativity; /* 1 = directly mapped, size = fully associative */
+    int64_t associativity; /* 1 = directly mapped, size/blockSize = fully associative */
     int64_t numSets; /* number of q = number of sets */
     int64_t blockSize; /* size in bytes */
     int64_t numBlocks;

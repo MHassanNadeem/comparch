@@ -7,12 +7,13 @@ uint64_t divideRoundup(uint64_t dividend, uint64_t divisor){
 LRUCache::LRUCache(int64_t size, int64_t blockSize, int64_t associativity){
     assert(size >= blockSize);
     assert(size >= associativity);
+    assert(associativity <= size/blockSize);
 
     this->size = size;
     this->blockSize = blockSize;
     this->associativity = associativity;
     this->numBlocks = size/blockSize;
-    this->numSets = divideRoundup(numBlocks, associativity); // numBlocks/associativity;
+    this->numSets = numBlocks/associativity;
     
     DBG(size, lu);
     DBG(blockSize, lu);
@@ -28,7 +29,7 @@ LRUCache::~LRUCache(){
 }
 
 int64_t LRUCache::getSetNumber(int64_t addr){
-    return addr%(numSets*blockSize);
+    return getBlockNumber(addr)%numSets;
 }
 
 int64_t LRUCache::getBlockNumber(int64_t addr){
@@ -59,13 +60,14 @@ void LRUCache::add(int64_t addr, bool isPrefetched){
     
     /* if not in the cache */
     if(!isPresent(blockNumber)){
+        PRINT("Block not cached, adding %lu(%lu)", addr, blockNumber);
         cacheBlock = {.blockNumber = blockNumber, .addr = addr, .wasPrefetched = isPrefetched};
         
         // set is full
         if (q[setNumber].size() == associativity){
             // delete LRU element
             struct CacheBlock last = q[setNumber].back();
-            PRINT("Cache full, deleting %lu", last.addr);
+            PRINT("Cache full, deleting block (%lu)", last.blockNumber);
             q[setNumber].pop_back();
             map.erase(last.addr);
         }
