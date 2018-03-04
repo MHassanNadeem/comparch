@@ -1,5 +1,6 @@
 #include "cache.h"
 #include "memory.h"
+#include "prefetcher.h"
 #include <stdio.h>
 #include <stdint.h>
 
@@ -10,16 +11,23 @@ int main(){
     printf("My Cache\n");
     printf("==============================\n");
     
+    LRUCache cache(4, 1, 4);
+    Prefetcher prefetcher(&cache, 1);
+    Memory memory(&cache, &prefetcher);
+
+
+    return 0;
+}
+
+void cacheTestCode(){
     LRUCache ca(4, 1, 4); /* Full: 5 4 1 3 */
     // LRUCache ca(4, 1, 1); /* Direct: 4 5 2 3 */
     
-    ca.access(1);
-    ca.access(2);
-    ca.access(3);
-    ca.access(1);
-    ca.access(4);
-    ca.access(5);
-    ca.display();
+    int64_t addresses[] = {1,2,3,1,4,5};
 
-    return 0;
+    for(int i=0; i<sizeof(addresses)/sizeof(int64_t); i++){
+        ca.access(addresses[i]);
+    }
+
+    ca.display();
 }
