@@ -2,6 +2,7 @@
 #include "memory.h"
 #include "prefetcher.h"
 #include "constStrideArrayPrefetcher.h"
+#include "varStrideArrayPrefetcher.h"
 #include <stdio.h>
 #include <stdint.h>
 
