@@ -7,19 +7,17 @@
 #include "cache.h"
 
 class Prefetcher{
+public:
     LRUCache *cache;
     int prefetchDegree;
-
-    uint64_t lastAddr;
-    int stride;
     
 public:
     Prefetcher(LRUCache *cache, int prefetchDegree);
     ~Prefetcher();
 
-    void seedMiss(uint64_t pc, uint64_t addr);
-    void seedHit(uint64_t pc, uint64_t addr);
-    void prefetch(uint64_t addr);
+    virtual void seedMiss(uint64_t pc, uint64_t addr) = 0;
+    virtual void seedHit(uint64_t pc, uint64_t addr);
+    virtual void prefetch(uint64_t addr);
     
 };
 

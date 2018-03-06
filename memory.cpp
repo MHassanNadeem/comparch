@@ -13,13 +13,13 @@ void Memory::access(uint64_t pc, uint64_t addr){
     numAccesses++;
     
     if(cache->isPresent(addr)){
-        prefetcher->seedHit(pc, addr);
+        if(prefetcher) prefetcher->seedHit(pc, addr);
         numCacheHits++;
         if(cache->isPrefetched(addr)){
             numHitsPrefetch++;
         }
     }else{
-        prefetcher->seedMiss(pc, addr);
+        if(prefetcher) prefetcher->seedMiss(pc, addr);
         numCacheMisses++;
     }
 

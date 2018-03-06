@@ -1,6 +1,7 @@
 #include "cache.h"
 #include "memory.h"
 #include "prefetcher.h"
+#include "constStrideArrayPrefetcher.h"
 #include <stdio.h>
 #include <stdint.h>
 
@@ -12,7 +13,7 @@ int main(){
     printf("==============================\n");
     
     LRUCache cache(4, 1, 4);
-    Prefetcher prefetcher(&cache, 1);
+    ConstStrideArrayPrefetcher prefetcher(&cache, 1);
     Memory memory(&cache, &prefetcher);
 
 
