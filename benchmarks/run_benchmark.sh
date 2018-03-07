@@ -45,4 +45,4 @@ pwd
 #         * ) echo "Please answer yes or no.";;
 #     esac
 # done
-cp $pin_path/source/tools/ManualExamples/obj-intel64/pinatrace.so /home/feynmann/benchmarks/comparch/benchmarks/
+cp $pin_path/source/tools/ManualExamples/pinatrace.out /home/feynmann/benchmarks/comparch/benchmarks/results
