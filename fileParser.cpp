@@ -12,19 +12,21 @@ FileParser::~FileParser(){
 }
 
 bool FileParser::getNext(uint64_t &pc, uint64_t &addr){
-    char buffer[256];
+    char buffer[100];
     char pc_s[20];
     char addr_s[20];
 
-    file.getline(buffer, sizeof(buffer));
-    int ret = sscanf(buffer,"%s %*1s %s",pc_s, addr_s);
-    if(ret < 2){
-        endOfFile = true;
-        return false;
-    }
+    if( !file.getline(buffer, sizeof(buffer)) )  goto error;
+    if( sscanf(buffer,"%s %*1s %s",pc_s, addr_s) < 2 ) goto error;
 
     pc = stoul(pc_s, nullptr, 16);
     addr = stoul(addr_s, nullptr, 16);
+
+    return true;
+
+    error:
+        endOfFile = true;
+        return false;
 }
 
 bool FileParser::eof(){
