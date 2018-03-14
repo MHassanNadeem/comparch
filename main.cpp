@@ -3,6 +3,7 @@
 #include "prefetcher.h"
 #include "constStrideArrayPrefetcher.h"
 #include "varStrideArrayPrefetcher.h"
+#include "linkedListPrefetcher.h"
 #include <stdio.h>
 #include <stdint.h>
 
