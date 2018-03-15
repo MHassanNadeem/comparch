@@ -17,8 +17,8 @@ int main(){
     printf("===============================\n");
     
     LRUCache cache(4, 1, 4);
-    ConstStrideArrayPrefetcher prefetcher(&cache, 1);
-    Memory memory(&cache, &prefetcher);
+    ConstStrideArrayPrefetcher csPrefetcher(&cache, 5, 10);
+    Memory memory(&cache, &csPrefetcher);
 
 
     uint64_t pc, addr;
@@ -42,4 +42,9 @@ void cacheTestCode(){
     }
 
     ca.display();
+}
+
+
+void arrayMicroBenchmark(){
+    
 }

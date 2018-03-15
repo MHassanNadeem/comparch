@@ -7,12 +7,18 @@
 #include "cache.h"
 #include "prefetcher.h"
 
-class ConstStrideArrayPrefetcher : public Prefetcher{
+struct CsEntry{
+    uint64_t pc;
     uint64_t lastAddr;
-    int stride;
+    uint64_t stride;
+};
+
+class ConstStrideArrayPrefetcher : public Prefetcher{
+    list<CsEntry> q;
+    int num_pc;
     
 public:
-    ConstStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree);
+    ConstStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree, int num_pc);
     ~ConstStrideArrayPrefetcher();
 
     void seedMiss(uint64_t pc, uint64_t addr);

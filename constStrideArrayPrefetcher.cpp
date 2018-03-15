@@ -1,7 +1,14 @@
 #include "constStrideArrayPrefetcher.h"
 
-ConstStrideArrayPrefetcher::ConstStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree) : Prefetcher(cache, prefetchDegree){
-    
+ConstStrideArrayPrefetcher::ConstStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree, int num_pc) : Prefetcher(cache, prefetchDegree){
+    this->num_pc = num_pc;
+
+    /* Initialize the data structure with full capacity,
+       this is to make other functions simpler */
+    struct CsEntry csEntry = {0,0,0};
+    for(int i=0; i<num_pc; i++){
+        q.push_front(csEntry);
+    }
 }
 
 
@@ -10,14 +17,36 @@ ConstStrideArrayPrefetcher::~ConstStrideArrayPrefetcher(){
 }
 
 void ConstStrideArrayPrefetcher::seedMiss(uint64_t pc, uint64_t missAddr){
-    int curStride = missAddr - lastAddr;
-    
-    if(curStride == stride){
-        for(int i=0; i<prefetchDegree; i++){
-            prefetch(missAddr + i*stride);
+    struct CsEntry csEntry;
+
+    /* This iterator will refer to the required struct that contains our pc */
+    list<CsEntry>::iterator itcs = q.begin(); /* Initilze to LRU element, which will be updated by default if pc not found */
+
+    /* Find the iterator to the struct in the q that matches our pc  */
+    for (auto it = q.begin(); it != q.end(); it++){
+        if( (*it).pc == pc){
+            itcs = it;
+            break;
         }
     }
 
-    lastAddr = missAddr;
-    stride=curStride;
+    /* copy and delete the node to be updated so that it can be added back at the end of the queue to mantain MRU element at the end */
+    csEntry = (*itcs);
+    q.erase(itcs);
+
+    /* Algorithm copied from the slides */
+    csEntry.pc = pc;
+    int curStride = missAddr - csEntry.lastAddr;
+    
+    if(curStride == csEntry.stride){
+        for(int i=0; i<prefetchDegree; i++){
+            prefetch(missAddr + i*csEntry.stride);
+        }
+    }
+
+    csEntry.lastAddr = missAddr;
+    csEntry.stride=curStride;
+    /* Algorithm end */
+
+    q.push_back(csEntry);
 }
