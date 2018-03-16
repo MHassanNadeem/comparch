@@ -1,10 +1,7 @@
 #include "cache.h"
 
-uint64_t divideRoundup(uint64_t dividend, uint64_t divisor){
-    return 1 + ((dividend - 1) / divisor);
-}
 
-LRUCache::LRUCache(int64_t size, int64_t blockSize, int64_t associativity){
+LRUCache::LRUCache(uint64_t size, uint64_t blockSize, uint64_t associativity){
     assert(size >= blockSize);
     assert(size >= associativity);
     assert(associativity <= size/blockSize);
@@ -28,33 +25,33 @@ LRUCache::~LRUCache(){
     delete [] q;
 }
 
-int64_t LRUCache::getSetNumber(int64_t addr){
+uint64_t LRUCache::getSetNumber(uint64_t addr){
     return getBlockNumber(addr)%numSets;
 }
 
-int64_t LRUCache::getBlockNumber(int64_t addr){
+uint64_t LRUCache::getBlockNumber(uint64_t addr){
     return addr/blockSize;
 }
 
-int64_t LRUCache::getBlockAddress(int64_t addr){
+uint64_t LRUCache::getBlockAddress(uint64_t addr){
     return getBlockNumber(addr)*blockSize;
 }
 
-bool LRUCache::isPresent(int64_t blockNumber){
+bool LRUCache::isPresent(uint64_t blockNumber){
     return !(map.find(blockNumber) == map.end());
 }
 
-bool LRUCache::isPrefetched(int64_t x){
-    int64_t blockNumber = getBlockNumber(x);
+bool LRUCache::isPrefetched(uint64_t x){
+    uint64_t blockNumber = getBlockNumber(x);
     
     return (*map[blockNumber]).wasPrefetched;
     
 }
 
 
-void LRUCache::add(int64_t addr, bool isPrefetched){
-    int64_t setNumber = getSetNumber(addr);
-    int64_t blockNumber = getBlockNumber(addr);
+void LRUCache::add(uint64_t addr, bool isPrefetched){
+    uint64_t setNumber = getSetNumber(addr);
+    uint64_t blockNumber = getBlockNumber(addr);
 
     struct CacheBlock cacheBlock;
     
@@ -82,17 +79,17 @@ void LRUCache::add(int64_t addr, bool isPrefetched){
     map[blockNumber] = q[setNumber].begin();
 }
 
-void LRUCache::prefetch(int64_t x){
+void LRUCache::prefetch(uint64_t x){
     add(x, true);
 }
 
-void LRUCache::access(int64_t x){
+void LRUCache::access(uint64_t x){
     add(x, false);
 }
  
 // display contents of cache
 void LRUCache::display(){
-    for(int64_t iSet = 0; iSet<numSets; iSet++){
+    for(uint64_t iSet = 0; iSet<numSets; iSet++){
         printf("Set %lu: ", iSet);
         for (auto it = q[iSet].begin(); it != q[iSet].end(); it++){
             printf("%lu(%lu) ", (*it).addr, (*it).blockNumber);
@@ -104,7 +101,7 @@ void LRUCache::display(){
 }
 
 void LRUCache::getAllCachedBlocks(vector<CacheBlock> &v){
-    for(int64_t iSet = 0; iSet<numSets; iSet++){
+    for(uint64_t iSet = 0; iSet<numSets; iSet++){
         for (auto it = q[iSet].begin(); it != q[iSet].end(); it++){
             v.push_back(*it);
         }
