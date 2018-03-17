@@ -21,7 +21,7 @@ public:
     ConstStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree, int num_pc);
     ~ConstStrideArrayPrefetcher();
 
-    void seedMiss(uint64_t pc, uint64_t addr);
+    void seedMiss(uint64_t pc, uint64_t blockNumber);
     
 };
 

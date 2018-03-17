@@ -16,7 +16,7 @@ ConstStrideArrayPrefetcher::~ConstStrideArrayPrefetcher(){
     
 }
 
-void ConstStrideArrayPrefetcher::seedMiss(uint64_t pc, uint64_t missAddr){
+void ConstStrideArrayPrefetcher::seedMiss(uint64_t pc, uint64_t missBlockNumber){
     struct CsEntry csEntry;
 
     /* This iterator will refer to the required struct that contains our pc */
@@ -36,15 +36,15 @@ void ConstStrideArrayPrefetcher::seedMiss(uint64_t pc, uint64_t missAddr){
 
     /* Algorithm copied from the slides */
     csEntry.pc = pc;
-    int curStride = missAddr - csEntry.lastAddr;
+    int curStride = missBlockNumber - csEntry.lastAddr;
     
     if(curStride == csEntry.stride){
         for(int i=0; i<prefetchDegree; i++){
-            prefetch(missAddr + i*csEntry.stride);
+            prefetch(missBlockNumber + i*csEntry.stride);
         }
     }
 
-    csEntry.lastAddr = missAddr;
+    csEntry.lastAddr = missBlockNumber;
     csEntry.stride=curStride;
     /* Algorithm end */
 

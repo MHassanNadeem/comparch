@@ -25,74 +25,70 @@ LRUCache::~LRUCache(){
     delete [] q;
 }
 
-uint64_t LRUCache::getSetNumber(uint64_t addr){
-    return getBlockNumber(addr)%numSets;
+uint64_t LRUCache::getSetNumber(uint64_t blockNumber){
+    return blockNumber%numSets;
 }
 
-uint64_t LRUCache::getBlockNumber(uint64_t addr){
-    return addr/blockSize;
+uint64_t LRUCache::getBlockNumber(uint64_t byteAddress){
+    return byteAddress/blockSize;
 }
 
-uint64_t LRUCache::getBlockAddress(uint64_t addr){
-    return getBlockNumber(addr)*blockSize;
+uint64_t LRUCache::getBlockAddress(uint64_t byteAddress){
+    return getBlockNumber(byteAddress)*blockSize;
 }
 
-bool LRUCache::isPresent(uint64_t blockNumber){
+bool LRUCache::isBlockPresent(uint64_t blockNumber){
     return !(map.find(blockNumber) == map.end());
 }
 
-bool LRUCache::isPrefetched(uint64_t x){
-    uint64_t blockNumber = getBlockNumber(x);
-    
+bool LRUCache::isBlockPrefetched(uint64_t blockNumber){
     return (*map[blockNumber]).wasPrefetched;
-    
 }
 
-
-void LRUCache::add(uint64_t addr, bool isPrefetched){
-    uint64_t setNumber = getSetNumber(addr);
-    uint64_t blockNumber = getBlockNumber(addr);
-
+void LRUCache::touchBlock(uint64_t blockNumber, bool isPrefetched){
+	uint64_t setNumber = getSetNumber(blockNumber);
     struct CacheBlock cacheBlock;
-    
+
     /* if not in the cache */
-    if(!isPresent(blockNumber)){
-        PRINT("Block not cached, adding %lu(%lu)", addr, blockNumber);
-        cacheBlock = {.blockNumber = blockNumber, .addr = addr, .wasPrefetched = isPrefetched};
-        
-        // set is full
+    if(!isBlockPresent(blockNumber)){
+    	/* -- Cache Miss -- */
+        PRINT("Block not cached, adding %lu", blockNumber);
+        cacheBlock = {.blockNumber = blockNumber, .wasPrefetched = isPrefetched};
+
+        /* Set is full */
         if (q[setNumber].size() == associativity){
-            // delete LRU element
+            /* delete LRU element */
             struct CacheBlock last = q[setNumber].back();
             PRINT("Cache full, deleting block (%lu)", last.blockNumber);
             q[setNumber].pop_back();
-            map.erase(last.addr);
+            map.erase(last.blockNumber);
         }
     }else{
-        assert(isPrefetched == false);
-        cacheBlock = *map[blockNumber]; cacheBlock.addr = addr;
+    	/* -- Cache Hit -- */
+        cacheBlock = *map[blockNumber];
         q[setNumber].erase(map[blockNumber]);
     }
-    
-    // update reference
+
+    /* Put most recently pushed block to the front of the queue and update reference in the map */
     q[setNumber].push_front(cacheBlock);
     map[blockNumber] = q[setNumber].begin();
 }
 
-void LRUCache::prefetch(uint64_t x){
-    add(x, true);
+
+void LRUCache::prefetchBlock(uint64_t blockNumber){
+    touchBlock(blockNumber, true);
 }
 
-void LRUCache::access(uint64_t x){
-    add(x, false);
+void LRUCache::accessBlock(uint64_t blockNumber){
+    touchBlock(blockNumber, false);
 }
- 
-// display contents of cache
+
+
 void LRUCache::display(){
     for(uint64_t iSet = 0; iSet<numSets; iSet++){
         printf("Set %lu: ", iSet);
         for (auto it = q[iSet].begin(); it != q[iSet].end(); it++){
-            printf("%lu(%lu) ", (*it).addr, (*it).blockNumber);
+            printf("%lu ", (*it).blockNumber);
         }
         printf("\n");
     }

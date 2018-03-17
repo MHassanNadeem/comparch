@@ -9,21 +9,23 @@ Memory::~Memory(){
     
 }
 
-void Memory::access(uint64_t pc, uint64_t addr){
+void Memory::access(uint64_t pc, uint64_t byteAddr){
+	uint64_t blockNumber = cache->getBlockNumber(byteAddr);
+
     numAccesses++;
     
-    if(cache->isPresent(addr)){
-        if(prefetcher) prefetcher->seedHit(pc, addr);
-        numCacheHits++;
-        if(cache->isPrefetched(addr)){
+    if(cache->isBlockPresent(blockNumber)){
+    	numCacheHits++;
+        if(cache->isBlockPrefetched(blockNumber)){
             numHitsPrefetch++;
         }
+        if(prefetcher) prefetcher->seedHit(pc, blockNumber);
     }else{
-        if(prefetcher) prefetcher->seedMiss(pc, addr);
-        numCacheMisses++;
+    	numCacheMisses++;
+        if(prefetcher) prefetcher->seedMiss(pc, blockNumber);
     }
 
-    cache->access(addr);
+    cache->accessBlock(blockNumber);
 }
 
 
@@ -43,4 +45,15 @@ double Memory::getCoverage(){
 
 double Memory::getMisFetchRate(){
     return 0.0;
+}
+
+
+void Memory::printStats(){
+	printf("----- MEMORY STATS -----\n");
+	printf("Hits = %lu\n", numCacheHits);
+	printf("Misses = %lu\n", numCacheMisses);
+	printf("Hit Rate = %f\n", getHitRate());
+	printf("Miss Rate = %f\n", getMissRate());
+	printf("Coverage = %f\n", getCoverage());
+	printf("------------------------\n");
 }

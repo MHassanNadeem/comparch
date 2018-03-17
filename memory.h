@@ -23,12 +23,13 @@ public:
     Memory(LRUCache *cache, Prefetcher *prefetcher);
     ~Memory();
     
-    void access(uint64_t pc, uint64_t addr);
+    void access(uint64_t pc, uint64_t byteAddr);
     
     double getHitRate();
     double getMissRate();
     double getCoverage();
     double getMisFetchRate();
+    void printStats();
 };
 
 #endif /* MEMORY_H */

@@ -10,11 +10,11 @@ Prefetcher::~Prefetcher(){
     
 }
 
-void Prefetcher::prefetch(uint64_t addr){
-    cache->prefetch(addr);
+void Prefetcher::prefetch(uint64_t blockNumber){
+    cache->prefetchBlock(blockNumber);
 }
 
 /* Non abstract empty function because most prefetchers would not need to know the cache hits */
-void Prefetcher::seedHit(uint64_t pc, uint64_t addr){
+void Prefetcher::seedHit(uint64_t pc, uint64_t blockNumber){
     
 }

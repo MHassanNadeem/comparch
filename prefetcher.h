@@ -15,9 +15,9 @@ public:
     Prefetcher(LRUCache *cache, int prefetchDegree);
     ~Prefetcher();
 
-    virtual void seedMiss(uint64_t pc, uint64_t addr) = 0;
-    virtual void seedHit(uint64_t pc, uint64_t addr);
-    virtual void prefetch(uint64_t addr);
+    virtual void seedMiss(uint64_t pc, uint64_t blockNumber) = 0;
+    virtual void seedHit(uint64_t pc, uint64_t blockNumber);
+    virtual void prefetch(uint64_t blockNumber);
     
 };
 
