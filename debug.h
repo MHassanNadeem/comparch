@@ -1,9 +1,5 @@
 #include <stdio.h>
 
-#ifndef DEBUG_ON
-    #define DEBUG_ON 1
-#endif
-
 #if DEBUG_ON == 1
     #define DBG(var, type)          printf(#var" = %"#type"\n", var)
     #define DBGM(var, type, desc)   printf(desc" = %"#type"\n", var)
