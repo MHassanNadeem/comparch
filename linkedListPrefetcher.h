@@ -8,15 +8,14 @@
 #include "prefetcher.h"
 
 class LinkedListPrefetcher : public Prefetcher{
-    uint64_t lastAddr;
-    int stride;
+	list<uint64_t> GHBQueue;
+    size_t sizeGHB;
     
 public:
-    LinkedListPrefetcher(LRUCache *cache, int prefetchDegree);
+    LinkedListPrefetcher(LRUCache *cache, int prefetchDegree, size_t sizeGHB);
     ~LinkedListPrefetcher();
 
     void seedMiss(uint64_t pc, uint64_t addr);
-    
 };
 
 #endif /* LINKEDLISTPREFETCHER */
