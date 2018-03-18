@@ -10,9 +10,15 @@
 
 using namespace std;
 
+struct CacheStats{
+	uint64_t numBlocksPrefetched;
+	uint64_t numPrefetchedBlocksNotUsed;
+};
+
 struct CacheBlock{
     uint64_t blockNumber;
     bool wasPrefetched;
+    bool used;
 };
 
 class LRUCache{
@@ -26,6 +32,8 @@ class LRUCache{
     uint64_t blockSize; /* size in bytes */
     uint64_t numBlocks;
     
+    CacheStats stats = {0};
+
 
 public:
     LRUCache(uint64_t, uint64_t, uint64_t);
@@ -39,6 +47,7 @@ public:
     void getAllCachedBlocks(vector<CacheBlock> &v);
     uint64_t getBlockNumber(uint64_t byteAddress);
     uint64_t getBlockAddress(uint64_t byteAddress);
+    CacheStats getStats(){return stats;}
     
 private:
     void touchBlock(uint64_t blockNumber, bool isPrefetched);

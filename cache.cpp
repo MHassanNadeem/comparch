@@ -51,23 +51,33 @@ void LRUCache::touchBlock(uint64_t blockNumber, bool isPrefetched){
 
     /* if not in the cache */
     if(!isBlockPresent(blockNumber)){
+    	/* TODO: Should we increment numBlocksPrefetched if block to be prefetched is already in the cache? */
+    	if(isPrefetched){
+    		stats.numBlocksPrefetched++;
+    	}
     	/* -- Cache Miss -- */
         PRINT("Block not cached, adding %lu", blockNumber);
         cacheBlock = {.blockNumber = blockNumber, .wasPrefetched = isPrefetched};
 
         /* Set is full */
         if (q[setNumber].size() == associativity){
-            /* delete LRU element */
-            struct CacheBlock last = q[setNumber].back();
-            PRINT("Cache full, deleting block (%lu)", last.blockNumber);
+            /* EVICT: delete LRU element */
+            struct CacheBlock lru = q[setNumber].back();
+            PRINT("Cache full, deleting block (%lu)", lru.blockNumber);
+            if(lru.wasPrefetched && !lru.used){
+            	stats.numPrefetchedBlocksNotUsed++;
+            }
             q[setNumber].pop_back();
-            map.erase(last.blockNumber);
+            map.erase(lru.blockNumber);
         }
     }else{
     	/* -- Cache Hit -- */
         cacheBlock = *map[blockNumber];
         q[setNumber].erase(map[blockNumber]);
     }
+
+    /* Mark cache as used if request was a demand request (i.e. not a prefetch request) */
+    cacheBlock.used = cacheBlock.used || !isPrefetched;
 
     /* Put most recently pushed block to the front of the queue and update reference in the map */
     q[setNumber].push_front(cacheBlock);

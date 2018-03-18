@@ -44,7 +44,11 @@ double Memory::getCoverage(){
 }
 
 double Memory::getMisFetchRate(){
-    return 0.0;
+	uint64_t numPrefetchedBlocksNotUsed = cache->getStats().numPrefetchedBlocksNotUsed;
+	uint64_t numBlocksPrefetched = cache->getStats().numBlocksPrefetched;
+	DBG(numPrefetchedBlocksNotUsed, lu);
+	DBG(numBlocksPrefetched, lu);
+    return (double) numPrefetchedBlocksNotUsed/numBlocksPrefetched;
 }
 
 
@@ -55,5 +59,6 @@ void Memory::printStats(){
 	printf("Hit Rate = %f\n", getHitRate());
 	printf("Miss Rate = %f\n", getMissRate());
 	printf("Coverage = %f\n", getCoverage());
+	printf("Misfetch Rate = %f\n", getMisFetchRate());
 	printf("------------------------\n");
 }
