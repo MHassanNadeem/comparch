@@ -12,7 +12,19 @@
 #include <time.h>
 #include <utility>
 
-#define NUM_BYTES_IN_MB 1048576LU
+#define NUM_BYTES_IN_MB 		1048576LU
+
+#define L2_CACHE_SIZE			2*NUM_BYTES_IN_MB
+#define L2_CACHE_BLOCK_SIZE		64
+#define L2_CACHE_ASSOCIATIVITY 	8
+
+#define RAM_CACHE_SIZE			L2_CACHE_BLOCK_SIZE*64*1024LU
+#define RAM_CACHE_BLOCK_SIZE	L2_CACHE_BLOCK_SIZE*64
+#define RAM_CACHE_ASSOCIATIVITY	1
+
+#define PREFETCHER_NUM_PC		256
+#define PREFETCHER_NUM_STRIDES	256
+#define PREFETCHER_GHB_SIZE		(L2_CACHE_SIZE/L2_CACHE_BLOCK_SIZE)*100LU
 
 void arrayMicroBenchmark();
 void linkedListMicroBenchmark();
@@ -24,22 +36,33 @@ int main(){
     printf("|          Project 5          |\n");
     printf("===============================\n");
     
-//    LRUCache cache(4, 1, 4);
-//    ConstStrideArrayPrefetcher csPrefetcher(&cache, 5, 10);
-//    Memory memory(&cache, &csPrefetcher);
+    LRUCache ramCache(RAM_CACHE_SIZE, RAM_CACHE_BLOCK_SIZE, RAM_CACHE_ASSOCIATIVITY);
+    Memory ram(&ramCache, nullptr);
+
+    LRUCache l2Cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
+//    ConstStrideArrayPrefetcher csPrefetcher(&l2Cache, 10, PREFETCHER_NUM_PC);
+    LinkedListPrefetcher llPrefetcher(&l2Cache, 20, PREFETCHER_GHB_SIZE);
+    Memory memory(&l2Cache, &llPrefetcher, &ram);
 
 
-//    uint64_t pc, addr;
-//    FileParser file1("pinatrace13.out");
-//
+    uint64_t pc, addr;
+    FileParser file1("526_blender_r_pinatrace.out");
+
 //    while( file1.getNext(pc, addr) ){
-//        printf("0x%lx - 0x%lx\n", pc, addr);
+////        printf("0x%lx - 0x%lx\n", pc, addr);
+//    	memory.access(pc, addr);
 //    }
+//
+//    memory.printStats();
 
-    arrayMicroBenchmark();
-//    linkedListMicroBenchmark();
-
+//    arrayMicroBenchmark();
+    linkedListMicroBenchmark();
+//
     return 0;
+}
+
+void runTraceConstStride(string fileName, int ){
+
 }
 
 void cacheTestCode(){
@@ -57,8 +80,8 @@ void cacheTestCode(){
 
 
 void arrayMicoBenchmarkRun(vector<pair<uint64_t, uint64_t>> &accessPattern){
-	LRUCache cache(2*NUM_BYTES_IN_MB, 64, 8);
-	ConstStrideArrayPrefetcher csPrefetcher(&cache, 10, 256);
+	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
+	ConstStrideArrayPrefetcher csPrefetcher(&cache, 10, PREFETCHER_NUM_PC);
 	Memory memory(&cache, &csPrefetcher);
 
 	LRUCache cache2(2*NUM_BYTES_IN_MB, 64, 8);
@@ -69,10 +92,8 @@ void arrayMicoBenchmarkRun(vector<pair<uint64_t, uint64_t>> &accessPattern){
 		memory2.access(accessPattern[i].first, accessPattern[i].second);
 	}
 
-	printf("With Const Stride Array Prefetcher Disabled\n");
 	memory2.printStats();
 
-	printf("With Const Stride Array Prefetcher Enabled\n");
 	memory.printStats();
 }
 
@@ -83,14 +104,14 @@ void arrayMicroBenchmark(){
 		uint64_t pc;
 		uint64_t startAddress;
 		uint64_t arraySize;
-		uint64_t stride;
+		int64_t  stride;
 	};
 
 	struct TestData testData[4] = {
-		{1,          1, 10000, 10},
-		{2, 1000000000, 10000, 20},
-		{3, 2000000000, 10000, 30},
-		{4, 3000000000, 10000, 40}
+		{1, 1000000000, 100000, 30},
+		{2, 2000000000, 100000, 40},
+		{3, 3000000000, 100000, 50},
+		{4, 4000000000, 100000, 70}
 	};
 
 
@@ -105,7 +126,7 @@ void arrayMicroBenchmark(){
 
 void linkedListMicoBenchmarkRun(vector<pair<uint64_t, uint64_t>> &accessPattern){
 	LRUCache cache1(2*NUM_BYTES_IN_MB, 64, 8);
-	LinkedListPrefetcher llPrefetcher(&cache1, 10, 256);
+	LinkedListPrefetcher llPrefetcher(&cache1, 30, PREFETCHER_GHB_SIZE);
 	Memory memoryWithPrefetcher(&cache1, &llPrefetcher);
 
 	LRUCache cache2(2*NUM_BYTES_IN_MB, 64, 8);
@@ -124,7 +145,9 @@ void linkedListMicoBenchmarkRun(vector<pair<uint64_t, uint64_t>> &accessPattern)
 }
 
 void linkedListMicroBenchmark(){
-	const int LINKED_LIST_SIZE = 100;
+	const int LINKED_LIST_SIZE = 10000;
+	const int NODE_SIZE = 100;
+	void* addressess[LINKED_LIST_SIZE];
 	set<uint64_t> addresses;
 
 	vector<pair<uint64_t, uint64_t>> accessPattern;
@@ -135,32 +158,19 @@ void linkedListMicroBenchmark(){
 	}
 
 	/* populate accessPattern array with pc and addr */
-//	for(int i=0; i<2; i++){
 		for(auto it=addresses.begin(); it!=addresses.end(); ++it){
 			accessPattern.push_back( make_pair(0, *it) );
+//			cout<<"++++ "<<(*it)/L2_CACHE_BLOCK_SIZE<<endl;
 		}
 
 		/* Add noise so that some of the cached linked list is evicted */
-//		for(int j=0; j<100000; j++){
-//			uint64_t uniqueRandom;
-//			do{
-//				uniqueRandom = rand();
-//			}while(addresses.count(uniqueRandom) == 1);
-//			accessPattern.push_back( make_pair(0, uniqueRandom) );
-//		}
-
-//		for(int j=0; j<10000; j++){
-//			uint64_t uniqueRandom;
-//			do{
-//				uniqueRandom = rand();
-//			}while(addresses.count(uniqueRandom) == 1);
-//			accessPattern.push_back( make_pair(0, uniqueRandom) );
-//		}
+		for(uint64_t i=(long)RAND_MAX+5,j=0; i<(UINT64_MAX-L2_CACHE_BLOCK_SIZE) && j<L2_CACHE_SIZE/L2_CACHE_BLOCK_SIZE; i+=L2_CACHE_BLOCK_SIZE,j++){
+			accessPattern.push_back( make_pair(0, i) );
+		}
 
 		for(auto it=addresses.begin(); it!=addresses.end(); ++it){
 			accessPattern.push_back( make_pair(0, *it) );
 		}
-//	}
 
 	linkedListMicoBenchmarkRun(accessPattern);
 }
