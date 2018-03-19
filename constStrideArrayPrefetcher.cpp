@@ -37,7 +37,7 @@ void ConstStrideArrayPrefetcher::seedMiss(uint64_t pc, uint64_t missBlockNumber)
 
     /* Algorithm copied from the slides */
     csEntry.pc = pc;
-    int curStride = missBlockNumber - csEntry.lastAddr;
+    int64_t curStride = missBlockNumber - csEntry.lastAddr;
     
     if(curStride == csEntry.stride){
         for(int i=0; i<prefetchDegree; i++){

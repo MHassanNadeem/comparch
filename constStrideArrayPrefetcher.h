@@ -10,7 +10,7 @@
 struct CsEntry{
     uint64_t pc;
     uint64_t lastAddr;
-    uint64_t stride;
+    int64_t  stride;
 };
 
 class ConstStrideArrayPrefetcher : public Prefetcher{
