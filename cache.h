@@ -48,6 +48,7 @@ public:
     uint64_t getBlockNumber(uint64_t byteAddress);
     uint64_t getBlockAddress(uint64_t byteAddress);
     CacheStats getStats(){return stats;}
+    void printInfo();
     
 private:
     void touchBlock(uint64_t blockNumber, bool isPrefetched);

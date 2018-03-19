@@ -113,3 +113,28 @@ void LRUCache::getAllCachedBlocks(vector<CacheBlock> &v){
         }
     }
 }
+
+void LRUCache::printInfo(){
+	const int NUM_BYTES_IN_MB = 1048576;
+	const int NUM_BYTES_IN_KB = 1024;
+
+	printf("Size = ");
+	if(size/NUM_BYTES_IN_MB > 0){
+		printf("%lu MB\n", size/NUM_BYTES_IN_MB);
+	}else if(size/NUM_BYTES_IN_KB > 0){
+		printf("%lu KB\n", size/NUM_BYTES_IN_KB);
+	}else{
+		printf("%lu B\n", size);
+	}
+
+	printf("Block Size = %lu B\n", blockSize);
+
+	printf("Associativity = ");
+	if(associativity == 1){
+		printf("Direct Mapped\n");
+	}else if(associativity == size/blockSize){
+		printf("Fully Associative\n");
+	}else{
+		printf("%lu\n", associativity);
+	}
+}
