@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-std=c++11
+CFLAGS=-std=c++11 -g3
 
 OBJECTS=cache.o memory.o prefetcher.o constStrideArrayPrefetcher.o varStrideArrayPrefetcher.o linkedListPrefetcher.o fileParser.o main.o
 INCLUDES=$(wildcard *.h)
