@@ -3,6 +3,7 @@
 VarStrideArrayPrefetcher::VarStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree, int num_pc, int num_strides) : Prefetcher(cache, prefetchDegree){
     this-> num_pc = num_pc;
     this->num_strides = num_strides;
+    this->name = "Variable Stride Array Prefetcher";
     
     /* Initialize the data structure with full capacity,
        this is to make other functions simpler */
@@ -71,4 +72,11 @@ void VarStrideArrayPrefetcher::seedMiss(uint64_t pc, uint64_t missAddr){
     }
 
     q.push_back(vsEntry);
+}
+
+void VarStrideArrayPrefetcher::printInfo(){
+	printf("Prefetcher = %s\n", name.c_str());
+	printf("Prefetch Degree = %d\n", prefetchDegree);
+	printf("Num PC = %d\n", num_pc);
+	printf("Num Strides = %d", num_strides);
 }

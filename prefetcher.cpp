@@ -18,3 +18,7 @@ void Prefetcher::prefetch(uint64_t blockNumber){
 void Prefetcher::seedHit(uint64_t pc, uint64_t blockNumber){
     
 }
+
+void Prefetcher::printInfo(){
+	printf("Prefetcher = %s\n", name.c_str());
+}

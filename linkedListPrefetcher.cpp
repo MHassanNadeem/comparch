@@ -2,6 +2,7 @@
 
 LinkedListPrefetcher::LinkedListPrefetcher(LRUCache *cache, int prefetchDegree, size_t sizeGHB) : Prefetcher(cache, prefetchDegree){
 	this->sizeGHB = sizeGHB;
+	this->name = "Linked List Prefetcher";
 }
 
 
@@ -31,4 +32,10 @@ void LinkedListPrefetcher::seedMiss(uint64_t pc, uint64_t missBlockNumber){
 
 	GHBQueue.push_front(missBlockNumber);
 	map[missBlockNumber] = GHBQueue.begin(); /* Keep track of the youngest address in the map */
+}
+
+void LinkedListPrefetcher::printInfo(){
+	printf("Prefetcher = %s\n", name.c_str());
+	printf("Prefetch Degree = %d\n", prefetchDegree);
+	printf("GHB size = %lu\n", sizeGHB);
 }

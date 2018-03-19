@@ -2,6 +2,7 @@
 
 ConstStrideArrayPrefetcher::ConstStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree, int num_pc) : Prefetcher(cache, prefetchDegree){
     this->num_pc = num_pc;
+    this->name = "Constant Stride Array Prefetcher";
 
     /* Initialize the data structure with full capacity,
        this is to make other functions simpler */
@@ -49,4 +50,10 @@ void ConstStrideArrayPrefetcher::seedMiss(uint64_t pc, uint64_t missBlockNumber)
     /* Algorithm end */
 
     q.push_back(csEntry);
+}
+
+void ConstStrideArrayPrefetcher::printInfo(){
+	printf("Prefetcher = %s\n", name.c_str());
+	printf("Prefetch Degree = %d\n", prefetchDegree);
+	printf("Num PC = %d\n", num_pc);
 }

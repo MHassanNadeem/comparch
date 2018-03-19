@@ -22,6 +22,7 @@ public:
     ~ConstStrideArrayPrefetcher();
 
     void seedMiss(uint64_t pc, uint64_t blockNumber);
+    void printInfo();
     
 };
 

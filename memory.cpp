@@ -53,6 +53,18 @@ double Memory::getMisFetchRate(){
 
 
 void Memory::printStats(){
+	printf("\n=========================\n");
+
+	printf("--------- CACHE ---------\n");
+	cache->printInfo();
+
+	printf("------- PREFETCHER-------\n");
+	if(prefetcher == nullptr){
+		printf("NULL\n");
+	}else{
+		prefetcher->printInfo();
+	}
+
 	printf("----- MEMORY STATS -----\n");
 	printf("Hits = %lu\n", numCacheHits);
 	printf("Misses = %lu\n", numCacheMisses);

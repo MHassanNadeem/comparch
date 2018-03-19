@@ -8,6 +8,7 @@
 
 class Prefetcher{
 public:
+	string name;
     LRUCache *cache;
     int prefetchDegree;
     
@@ -18,6 +19,7 @@ public:
     virtual void seedMiss(uint64_t pc, uint64_t blockNumber) = 0;
     virtual void seedHit(uint64_t pc, uint64_t blockNumber);
     virtual void prefetch(uint64_t blockNumber);
+    virtual void printInfo();
     
 };
 

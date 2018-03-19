@@ -27,6 +27,7 @@ public:
     ~VarStrideArrayPrefetcher();
 
     void seedMiss(uint64_t pc, uint64_t addr);
+    void printInfo();
     
 };
 
