@@ -33,8 +33,8 @@ uint64_t LRUCache::getBlockNumber(uint64_t byteAddress){
     return byteAddress/blockSize;
 }
 
-uint64_t LRUCache::getBlockAddress(uint64_t byteAddress){
-    return getBlockNumber(byteAddress)*blockSize;
+uint64_t LRUCache::getBlockAddress(uint64_t blockNumber){
+	return blockNumber*blockSize;
 }
 
 bool LRUCache::isBlockPresent(uint64_t blockNumber){
