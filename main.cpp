@@ -28,6 +28,7 @@
 
 void arrayMicroBenchmark();
 void linkedListMicroBenchmark();
+void megaBenchmark(string fileName);
 
 int main(){
 	time_t t;
@@ -35,48 +36,131 @@ int main(){
     printf("===============================\n");
     printf("|          Project 5          |\n");
     printf("===============================\n");
-    
-    LRUCache ramCache(RAM_CACHE_SIZE, RAM_CACHE_BLOCK_SIZE, RAM_CACHE_ASSOCIATIVITY);
-    Memory ram(&ramCache, nullptr);
 
-    LRUCache l2Cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-//    ConstStrideArrayPrefetcher csPrefetcher(10, PREFETCHER_NUM_PC);
-    LinkedListPrefetcher llPrefetcher(20, PREFETCHER_GHB_SIZE);
-    Memory memory(&l2Cache, &llPrefetcher, &ram, false);
+    string file16gb = "/media/hassan/7A5452395451F7F9/BenchMarks/pinatrace_mcf_605.out";
+    string file1gb = "526_blender_r_pinatrace.out";
+    string superSmallfile = "pinatrace1.out";
+    megaBenchmark(superSmallfile);
 
-
-    string fileName = "/media/hassan/7A5452395451F7F9/BenchMarks/pinatrace_mcf_605.out";
-//    runBenchmark(fileName, &memory);
-
-
-//    arrayMicroBenchmark();
-    linkedListMicroBenchmark();
-//
     return 0;
 }
 
-void runBenchmark(string fileName, Memory *memory){
+void arrayBenchmark_bp(string fileName, int prefetchDegree){
+	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
+	ConstStrideArrayPrefetcher csPrefetcher(prefetchDegree, PREFETCHER_NUM_PC);
+	Memory memory(&cache, &csPrefetcher);
+
 	uint64_t pc, addr;
 
 	FileParser file(fileName);
 
     while( file.getNext(pc, addr) ){
-    	memory->access(pc, addr);
-    }
-}
-
-void cacheTestCode(){
-    LRUCache ca(4, 1, 4); /* Full: 5 4 1 3 */
-    // LRUCache ca(4, 1, 1); /* Direct: 4 5 2 3 */
-    
-    int64_t addresses[] = {1,2,3,1,4,5};
-
-    for(int i=0; i<sizeof(addresses)/sizeof(int64_t); i++){
-        ca.accessBlock(addresses[i]);
+    	memory.access(pc, addr);
     }
 
-    ca.display();
+	printf("Const Stride Array MegaBenchmark with Block PD: %d\n", prefetchDegree);
+	memory.printStats();
 }
+
+void arrayBenchmark_pp(string fileName, int prefetchDegree){
+    LRUCache ramCache(RAM_CACHE_SIZE, RAM_CACHE_BLOCK_SIZE, RAM_CACHE_ASSOCIATIVITY);
+    Memory ram(&ramCache, nullptr);
+
+	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
+	ConstStrideArrayPrefetcher csPrefetcher(prefetchDegree, PREFETCHER_NUM_PC);
+    Memory memory(&cache, &csPrefetcher, &ram, true);
+
+	uint64_t pc, addr;
+
+	FileParser file(fileName);
+
+    while( file.getNext(pc, addr) ){
+    	memory.access(pc, addr);
+    }
+
+	printf("Const Stride Array MegaBenchmark with Page PD: %d\n", prefetchDegree);
+	memory.printStats();
+}
+
+void llBenchmark_bp(string fileName, int prefetchDegree){
+	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
+	LinkedListPrefetcher llPrefetcher(prefetchDegree, PREFETCHER_GHB_SIZE);
+    Memory memory(&cache, &llPrefetcher);
+
+	uint64_t pc, addr;
+
+	FileParser file(fileName);
+
+    while( file.getNext(pc, addr) ){
+    	memory.access(pc, addr);
+    }
+
+	printf("Linked List MegaBenchmark with Block PD: %d\n", prefetchDegree);
+	memory.printStats();
+}
+
+void llBenchmark_pp(string fileName, int prefetchDegree){
+	LRUCache ramCache(RAM_CACHE_SIZE, RAM_CACHE_BLOCK_SIZE, RAM_CACHE_ASSOCIATIVITY);
+    Memory ram(&ramCache, nullptr);
+
+	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
+	LinkedListPrefetcher llPrefetcher(prefetchDegree, PREFETCHER_GHB_SIZE);
+    Memory memory(&cache, &llPrefetcher, &ram, true);
+
+	uint64_t pc, addr;
+
+	FileParser file(fileName);
+
+    while( file.getNext(pc, addr) ){
+    	memory.access(pc, addr);
+    }
+
+	printf("Linked List MegaBenchmark with Page PD: %d\n", prefetchDegree);
+	memory.printStats();
+}
+
+
+void megaBenchmark(string fileName){
+	cout<<"Running benchmark "<<fileName<<endl;
+
+	for(int pd = 0; pd<=100; pd+=10){
+		arrayBenchmark_bp(fileName, pd);
+		printf("\n");
+	}
+
+	printf("\n*******************************************************************************************************\n");
+
+
+	for(int pd = 0; pd<=100; pd+=10){
+		arrayBenchmark_pp(fileName, pd);
+		printf("\n");
+	}
+
+	printf("\n*******************************************************************************************************\n");
+	printf("*******************************************************************************************************\n");
+	printf("*******************************************************************************************************\n");
+	printf("*******************************************************************************************************\n\n");
+
+	for(int pd = 0; pd<=50; pd+=5){
+		llBenchmark_bp(fileName, pd);
+		printf("\n");
+	}
+
+	printf("\n*******************************************************************************************************\n");
+
+	for(int pd = 0; pd<=50; pd+=5){
+		llBenchmark_pp(fileName, pd);
+		printf("\n");
+	}
+}
+
+
+
+/**************************************************************************************/
+/**************************************************************************************/
+// Micro Benchmarks Below
+/**************************************************************************************/
+/**************************************************************************************/
 
 
 /* Without prefetcher */
@@ -151,7 +235,7 @@ void arrayMicroBenchmark(){
 
 
 //	arrayMicoBenchmarkRun_np(accessPattern);
-	for(int pd = 10; pd<=100; pd+=10){
+	for(int pd = 0; pd<=100; pd+=10){
 //		arrayMicoBenchmarkRun_bp(accessPattern, pd);
 		arrayMicoBenchmarkRun_pp(accessPattern, pd);
 		printf("\n");
@@ -233,9 +317,9 @@ void linkedListMicroBenchmark(){
 		}
 
 //		linkedListMicoBenchmarkRun_np(accessPattern);
-		for(int pd = 5; pd<=50; pd+=5){
-//			linkedListMicoBenchmarkRun_bp(accessPattern, pd);
-			linkedListMicoBenchmarkRun_pp(accessPattern, pd);
+		for(int pd = 0; pd<=50; pd+=5){
+			linkedListMicoBenchmarkRun_bp(accessPattern, pd);
+//			linkedListMicoBenchmarkRun_pp(accessPattern, pd);
 			printf("\n");
 		}
 }
