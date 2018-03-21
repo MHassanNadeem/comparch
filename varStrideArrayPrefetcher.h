@@ -23,7 +23,7 @@ class VarStrideArrayPrefetcher : public Prefetcher{
     int num_strides;
     
 public:
-    VarStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree, int num_pc, int num_strides);
+    VarStrideArrayPrefetcher(int prefetchDegree, int num_pc, int num_strides);
     ~VarStrideArrayPrefetcher();
 
     void seedMiss(uint64_t pc, uint64_t addr);

@@ -1,8 +1,7 @@
 #include "prefetcher.h"
 
-Prefetcher::Prefetcher(LRUCache *cache, int prefetchDegree){
+Prefetcher::Prefetcher(int prefetchDegree){
     this->prefetchDegree = prefetchDegree;
-    this->cache = cache;
 }
 
 
@@ -10,8 +9,8 @@ Prefetcher::~Prefetcher(){
     
 }
 
-void Prefetcher::prefetch(uint64_t blockNumber){
-    cache->prefetchBlock(blockNumber);
+void Prefetcher::addToQueue(uint64_t blockNumber){
+	prefetchQueue.push_back(blockNumber);
 }
 
 /* Non abstract empty function because most prefetchers would not need to know the cache hits */

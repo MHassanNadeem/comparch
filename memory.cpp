@@ -5,6 +5,12 @@ Memory::Memory(LRUCache *cache, Prefetcher *prefetcher){
     this->prefetcher = prefetcher;
 }
 
+Memory::Memory(LRUCache *cache, Prefetcher *prefetcher, Memory * lowerMemory, bool prefetchLowerMem) :
+	Memory(cache, prefetcher){
+	this->lowerMemory = lowerMemory;
+	this->prefetchLowerMem = prefetchLowerMem;
+}
+
 Memory::~Memory(){
     
 }
@@ -15,15 +21,48 @@ void Memory::access(uint64_t pc, uint64_t byteAddr){
     numAccesses++;
     
     if(cache->isBlockPresent(blockNumber)){
+    	/* -- CACHE HIT -- */
     	numCacheHits++;
         if(cache->isBlockPrefetched(blockNumber)){
             numHitsPrefetch++;
         }
         if(prefetcher) prefetcher->seedHit(pc, blockNumber);
     }else{
+    	/* -- CACHE MISS -- */
     	numCacheMisses++;
         if(prefetcher) prefetcher->seedMiss(pc, blockNumber);
+        if(lowerMemory) lowerMemory->access(pc, byteAddr);
     }
+
+    /* Process the prefetching queue */
+    if(prefetcher){
+		while(prefetcher->prefetchQueue.size() > 0){
+			uint64_t blockNumberToPrefetch = prefetcher->prefetchQueue.front();
+			prefetcher->prefetchQueue.pop_front();
+			if(lowerMemory && prefetchLowerMem){
+				/* do page prediction */
+				uint64_t blockAddrToPrefetch = cache->getBlockAddress(blockNumberToPrefetch);
+				uint64_t lowerMemoryBlockNumber = lowerMemory->cache->getBlockNumber(blockAddrToPrefetch);
+				lowerMemory->cache->prefetchBlock( lowerMemoryBlockNumber );
+			}else{
+				/* do block prediction */
+				cache->prefetchBlock( blockNumberToPrefetch );
+			}
+		}
+    }
+//    if(prefetcher){
+//		while(prefetcher->prefetchQueue.size() > 0){
+//			uint64_t blockNumberToPrefetch = prefetcher->prefetchQueue.front();
+//			cache->prefetchBlock( blockNumberToPrefetch );
+//			/* prefet */
+//			if(lowerMemory &&  prefetchLowerMem){
+//				uint64_t blockAddrToPrefetch = cache->getBlockAddress(blockNumberToPrefetch);
+//				uint64_t lowerMemoryBlockNumber = lowerMemory->cache->getBlockNumber(blockAddrToPrefetch);
+//				lowerMemory->cache->prefetchBlock( lowerMemoryBlockNumber );
+//			}
+//			prefetcher->prefetchQueue.pop_front();
+//		}
+//    }
 
     cache->accessBlock(blockNumber);
 }
@@ -53,7 +92,7 @@ double Memory::getMisFetchRate(){
 
 
 void Memory::printStats(){
-	printf("\n=========================\n");
+	printf("=========================\n");
 
 	printf("--------- CACHE ---------\n");
 	cache->printInfo();
@@ -73,4 +112,6 @@ void Memory::printStats(){
 	printf("Coverage = %f\n", getCoverage());
 	printf("Misfetch Rate = %f\n", getMisFetchRate());
 	printf("------------------------\n");
+
+	if(lowerMemory) lowerMemory->printStats();
 }

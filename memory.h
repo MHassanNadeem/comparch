@@ -12,7 +12,9 @@ using namespace std;
 class Memory{
     
     LRUCache *cache;
-    Prefetcher *prefetcher;
+    Prefetcher *prefetcher = nullptr;
+    Memory *lowerMemory = nullptr;
+    bool prefetchLowerMem = false;
     
     uint64_t numCacheHits = 0;
     uint64_t numCacheMisses = 0;
@@ -21,6 +23,7 @@ class Memory{
     
 public:
     Memory(LRUCache *cache, Prefetcher *prefetcher);
+    Memory(LRUCache *cache, Prefetcher *prefetcher, Memory *lowerMemory, bool prefetchLowerMem);
     ~Memory();
     
     void access(uint64_t pc, uint64_t byteAddr);

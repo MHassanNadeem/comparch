@@ -18,7 +18,7 @@ class ConstStrideArrayPrefetcher : public Prefetcher{
     int num_pc;
     
 public:
-    ConstStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree, int num_pc);
+    ConstStrideArrayPrefetcher(int prefetchDegree, int num_pc);
     ~ConstStrideArrayPrefetcher();
 
     void seedMiss(uint64_t pc, uint64_t blockNumber);

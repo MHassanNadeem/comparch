@@ -1,6 +1,6 @@
 #include "linkedListPrefetcher.h"
 
-LinkedListPrefetcher::LinkedListPrefetcher(LRUCache *cache, int prefetchDegree, size_t sizeGHB) : Prefetcher(cache, prefetchDegree){
+LinkedListPrefetcher::LinkedListPrefetcher(int prefetchDegree, size_t sizeGHB) : Prefetcher(prefetchDegree){
 	this->sizeGHB = sizeGHB;
 	this->name = "Linked List Prefetcher";
 }
@@ -17,16 +17,15 @@ void LinkedListPrefetcher::seedMiss(uint64_t pc, uint64_t missBlockNumber){
 	if(map.find(missBlockNumber) != map.end()){
 		/* found */
 		auto it = map[missBlockNumber];
-		cout<<"--block found "<< missBlockNumber<<endl;
 		it++; /* start prefetching from the next block */
 		for(int i = 0; i < prefetchDegree && it != GHBQueue.end(); i++, it++){
-			prefetch(*it);
-			cout<<"Prefetching "<<*it<<endl;
+			addToQueue(*it);
 		}
 	}
 
 	if (GHBQueue.size() == sizeGHB){
 		/* remove the oldest address from map and GHB*/
+
 		map.erase(GHBQueue.front());
 		GHBQueue.pop_front();
 	}

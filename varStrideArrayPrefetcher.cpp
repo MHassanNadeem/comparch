@@ -1,6 +1,6 @@
 #include "varStrideArrayPrefetcher.h"
 
-VarStrideArrayPrefetcher::VarStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree, int num_pc, int num_strides) : Prefetcher(cache, prefetchDegree){
+VarStrideArrayPrefetcher::VarStrideArrayPrefetcher(int prefetchDegree, int num_pc, int num_strides) : Prefetcher(prefetchDegree){
     this-> num_pc = num_pc;
     this->num_strides = num_strides;
     this->name = "Variable Stride Array Prefetcher";
@@ -65,7 +65,7 @@ void VarStrideArrayPrefetcher::seedMiss(uint64_t pc, uint64_t missAddr){
         
         if(addr1 == vsEntry.lastStride && addr2 == vsEntry.currentStride){
             for(int j = 0; j<prefetchDegree; j++){
-                prefetch( vsEntry.strideArray[i+1+1+j] );
+            	addToQueue( vsEntry.strideArray[i+1+1+j] );
             }
             break;
         }

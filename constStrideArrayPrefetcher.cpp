@@ -1,6 +1,6 @@
 #include "constStrideArrayPrefetcher.h"
 
-ConstStrideArrayPrefetcher::ConstStrideArrayPrefetcher(LRUCache *cache, int prefetchDegree, int num_pc) : Prefetcher(cache, prefetchDegree){
+ConstStrideArrayPrefetcher::ConstStrideArrayPrefetcher(int prefetchDegree, int num_pc) : Prefetcher(prefetchDegree){
     this->num_pc = num_pc;
     this->name = "Constant Stride Array Prefetcher";
 
@@ -40,8 +40,8 @@ void ConstStrideArrayPrefetcher::seedMiss(uint64_t pc, uint64_t missBlockNumber)
     int64_t curStride = missBlockNumber - csEntry.lastAddr;
     
     if(curStride == csEntry.stride){
-        for(int i=0; i<prefetchDegree; i++){
-            prefetch(missBlockNumber + i*csEntry.stride);
+        for(int i=1; i<=prefetchDegree; i++){
+            addToQueue(missBlockNumber + i*csEntry.stride);
         }
     }
 

@@ -17,7 +17,7 @@ class LinkedListPrefetcher : public Prefetcher{
 
     
 public:
-    LinkedListPrefetcher(LRUCache *cache, int prefetchDegree, size_t sizeGHB);
+    LinkedListPrefetcher(int prefetchDegree, size_t sizeGHB);
     ~LinkedListPrefetcher();
 
     void seedMiss(uint64_t pc, uint64_t addr);
