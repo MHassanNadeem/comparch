@@ -33,6 +33,7 @@ public:
     double getCoverage();
     double getMisFetchRate();
     void printStats();
+    void minPrintStats();
 };
 
 #endif /* MEMORY_H */

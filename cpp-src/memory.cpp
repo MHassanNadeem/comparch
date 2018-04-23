@@ -115,3 +115,12 @@ void Memory::printStats(){
 
 	if(lowerMemory) lowerMemory->printStats();
 }
+
+void Memory::minPrintStats(){
+	cout<<numCacheHits<<" ";
+	cout<<numCacheMisses<<" ";
+	cout<<getHitRate()<<" ";
+	cout<<getMissRate()<<" ";
+	cout<<getCoverage()<<" ";
+	cout<<getMisFetchRate()<<"\n";
+}
