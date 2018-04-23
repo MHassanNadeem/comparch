@@ -28,132 +28,80 @@
 
 void arrayMicroBenchmark();
 void linkedListMicroBenchmark();
-void megaBenchmark(string fileName);
+void runBenchmark(string fileName, int prefetchDegree, int prefetchingAlgo, int isPagePrediction);
 
-int main(){
+int main(int argc, char *argv[]){
 	time_t t;
 	srand((unsigned) time(&t));
-    printf("===============================\n");
-    printf("|          Project 5          |\n");
-    printf("===============================\n");
 
-    string file16gb = "/media/hassan/7A5452395451F7F9/BenchMarks/pinatrace_mcf_605.out";
-    string file1gb = "526_blender_r_pinatrace.out";
-    string superSmallfile = "pinatrace1.out";
-    megaBenchmark(superSmallfile);
+	/*
+	1 - Name of benchmark file
+	2 - Prefetching degree
+	3 - 0 for const stride array prefetching, 1 for linkedlist prefetching
+	4 - 0 for block prediction, 1 for page prediction
+	*/
+
+	if(argc < 5){
+		printf("Invalid Input Arguments\n");
+		exit(-1);
+	}
+	
+	string fileName(argv[1]);
+	int prefetchDegree   = strtol( argv[2], NULL, 10 );
+	int prefetchingAlgo  = strtol( argv[3], NULL, 10 );
+	int isPagePrediction = strtol( argv[4], NULL, 10 );
+
+	runBenchmark(fileName, prefetchDegree, prefetchingAlgo, isPagePrediction);
 
     return 0;
 }
 
-void arrayBenchmark_bp(string fileName, int prefetchDegree){
-	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-	ConstStrideArrayPrefetcher csPrefetcher(prefetchDegree, PREFETCHER_NUM_PC);
-	Memory memory(&cache, &csPrefetcher);
+
+void runBenchmark(string fileName, int prefetchDegree, int prefetchingAlgo, int isPagePrediction){
+	Memory *memory, *ram;
+	Prefetcher *prefetcher;
+	LRUCache *cache, *ramCache;
+
+	ram = NULL;
+	ramCache = NULL;
+
+	cache = new LRUCache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
+
+	switch(prefetchingAlgo){
+		case 0:
+			prefetcher = new ConstStrideArrayPrefetcher(prefetchDegree, PREFETCHER_NUM_PC);
+			break;
+		case 1:
+			prefetcher = new LinkedListPrefetcher(prefetchDegree, PREFETCHER_GHB_SIZE);
+			break;
+	}
+
+	if(!isPagePrediction){ /* Block Prediction */
+		memory = new Memory(cache, prefetcher);
+	}else{ /* Page Prediction */
+		ramCache = new LRUCache(RAM_CACHE_SIZE, RAM_CACHE_BLOCK_SIZE, RAM_CACHE_ASSOCIATIVITY);
+		ram = new Memory(ramCache, nullptr);
+
+		memory = new Memory(cache, prefetcher, ram, true);
+	}
 
 	uint64_t pc, addr;
 
 	FileParser file(fileName);
 
     while( file.getNext(pc, addr) ){
-    	memory.access(pc, addr);
+    	memory->access(pc, addr);
     }
 
-	printf("Const Stride Array MegaBenchmark with Block PD: %d\n", prefetchDegree);
-	memory.printStats();
+	memory->minPrintStats();
+
+	/* Free Memory */
+	delete prefetcher;
+	delete memory;
+	delete cache;
+	delete ram;
+	delete ramCache;
 }
-
-void arrayBenchmark_pp(string fileName, int prefetchDegree){
-    LRUCache ramCache(RAM_CACHE_SIZE, RAM_CACHE_BLOCK_SIZE, RAM_CACHE_ASSOCIATIVITY);
-    Memory ram(&ramCache, nullptr);
-
-	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-	ConstStrideArrayPrefetcher csPrefetcher(prefetchDegree, PREFETCHER_NUM_PC);
-    Memory memory(&cache, &csPrefetcher, &ram, true);
-
-	uint64_t pc, addr;
-
-	FileParser file(fileName);
-
-    while( file.getNext(pc, addr) ){
-    	memory.access(pc, addr);
-    }
-
-	printf("Const Stride Array MegaBenchmark with Page PD: %d\n", prefetchDegree);
-	memory.printStats();
-}
-
-void llBenchmark_bp(string fileName, int prefetchDegree){
-	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-	LinkedListPrefetcher llPrefetcher(prefetchDegree, PREFETCHER_GHB_SIZE);
-    Memory memory(&cache, &llPrefetcher);
-
-	uint64_t pc, addr;
-
-	FileParser file(fileName);
-
-    while( file.getNext(pc, addr) ){
-    	memory.access(pc, addr);
-    }
-
-	printf("Linked List MegaBenchmark with Block PD: %d\n", prefetchDegree);
-	memory.printStats();
-}
-
-void llBenchmark_pp(string fileName, int prefetchDegree){
-	LRUCache ramCache(RAM_CACHE_SIZE, RAM_CACHE_BLOCK_SIZE, RAM_CACHE_ASSOCIATIVITY);
-    Memory ram(&ramCache, nullptr);
-
-	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-	LinkedListPrefetcher llPrefetcher(prefetchDegree, PREFETCHER_GHB_SIZE);
-    Memory memory(&cache, &llPrefetcher, &ram, true);
-
-	uint64_t pc, addr;
-
-	FileParser file(fileName);
-
-    while( file.getNext(pc, addr) ){
-    	memory.access(pc, addr);
-    }
-
-	printf("Linked List MegaBenchmark with Page PD: %d\n", prefetchDegree);
-	memory.printStats();
-}
-
-
-void megaBenchmark(string fileName){
-	cout<<"Running benchmark "<<fileName<<endl;
-
-	for(int pd = 0; pd<=100; pd+=10){
-		arrayBenchmark_bp(fileName, pd);
-		printf("\n");
-	}
-
-	printf("\n*******************************************************************************************************\n");
-
-
-	for(int pd = 0; pd<=100; pd+=10){
-		arrayBenchmark_pp(fileName, pd);
-		printf("\n");
-	}
-
-	printf("\n*******************************************************************************************************\n");
-	printf("*******************************************************************************************************\n");
-	printf("*******************************************************************************************************\n");
-	printf("*******************************************************************************************************\n\n");
-
-	for(int pd = 0; pd<=50; pd+=5){
-		llBenchmark_bp(fileName, pd);
-		printf("\n");
-	}
-
-	printf("\n*******************************************************************************************************\n");
-
-	for(int pd = 0; pd<=50; pd+=5){
-		llBenchmark_pp(fileName, pd);
-		printf("\n");
-	}
-}
-
 
 
 /**************************************************************************************/
