@@ -74,3 +74,5 @@ if __name__ == "__main__":
         time = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
         with open('{0}.json'.format(time), 'w') as outfile:
             json.dump(results, outfile, indent=4, sort_keys=True)
+    else:
+        sys.exit("ERROR: Benchmark file not specified")
