@@ -3,7 +3,11 @@
 FileParser::FileParser(string fileName){
     this->fileName = fileName;
 
-    file.open(fileName);
+    file.open(fileName, std::fstream::in);
+
+    if(!file || file.bad()){
+        throw std::runtime_error("ERROR: Could not open file");
+    }
 }
 
 
