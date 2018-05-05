@@ -26,9 +26,9 @@
 #define PREFETCHER_NUM_STRIDES	256
 #define PREFETCHER_GHB_SIZE		(L2_CACHE_SIZE/L2_CACHE_BLOCK_SIZE)*100LU
 
-void arrayMicroBenchmark();
-void linkedListMicroBenchmark();
+
 void runBenchmark(string fileName, int prefetchDegree, int prefetchingAlgo, int isPagePrediction);
+void runMicroBenchmark(string fileName, int prefetchDegree, int prefetchingAlgo, int isPagePrediction);
 
 int main(int argc, char *argv[]){
 	time_t t;
@@ -51,7 +51,11 @@ int main(int argc, char *argv[]){
 	int prefetchingAlgo  = strtol( argv[3], NULL, 10 );
 	int isPagePrediction = strtol( argv[4], NULL, 10 );
 
-	runBenchmark(fileName, prefetchDegree, prefetchingAlgo, isPagePrediction);
+	if(fileName.compare(0,5,"MICRO") == 0){
+		runMicroBenchmark(fileName, prefetchDegree, prefetchingAlgo, isPagePrediction);
+	}else{
+		runBenchmark(fileName, prefetchDegree, prefetchingAlgo, isPagePrediction);
+	}
 
     return 0;
 }
@@ -110,52 +114,7 @@ void runBenchmark(string fileName, int prefetchDegree, int prefetchingAlgo, int 
 /**************************************************************************************/
 /**************************************************************************************/
 
-
-/* Without prefetcher */
-void arrayMicoBenchmarkRun_np(vector<pair<uint64_t, uint64_t>> &accessPattern){
-	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-	Memory memory(&cache, nullptr);
-
-	for(int i=0; i<accessPattern.size(); i++){
-		memory.access(accessPattern[i].first, accessPattern[i].second);
-	}
-
-	printf("Const Stride Array MicroBenchmark without prefetching\n");
-	memory.printStats();
-}
-
-/* Block Prefetcher */
-void arrayMicoBenchmarkRun_bp(vector<pair<uint64_t, uint64_t>> &accessPattern, int prefetchDegree){
-	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-	ConstStrideArrayPrefetcher csPrefetcher(prefetchDegree, PREFETCHER_NUM_PC);
-	Memory memory(&cache, &csPrefetcher);
-
-	for(int i=0; i<accessPattern.size(); i++){
-		memory.access(accessPattern[i].first, accessPattern[i].second);
-	}
-
-	printf("Const Stride Array MicroBenchmark with Block PD: %d\n", prefetchDegree);
-	memory.printStats();
-}
-
-/* Page Prefetcher */
-void arrayMicoBenchmarkRun_pp(vector<pair<uint64_t, uint64_t>> &accessPattern, int prefetchDegree){
-    LRUCache ramCache(RAM_CACHE_SIZE, RAM_CACHE_BLOCK_SIZE, RAM_CACHE_ASSOCIATIVITY);
-    Memory ram(&ramCache, nullptr);
-
-	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-	ConstStrideArrayPrefetcher csPrefetcher(prefetchDegree, PREFETCHER_NUM_PC);
-    Memory memory(&cache, &csPrefetcher, &ram, true);
-
-	for(int i=0; i<accessPattern.size(); i++){
-		memory.access(accessPattern[i].first, accessPattern[i].second);
-	}
-
-	printf("Const Stride Array MicroBenchmark with Page PD: %d\n", prefetchDegree);
-	memory.printStats();
-}
-
-void arrayMicroBenchmark(){
+vector<pair<uint64_t, uint64_t>> getArrayMicroBenchmark(){
 	vector<pair<uint64_t, uint64_t>> accessPattern;
 
 	struct TestData{
@@ -181,62 +140,10 @@ void arrayMicroBenchmark(){
 		}
 	}
 
-
-//	arrayMicoBenchmarkRun_np(accessPattern);
-	for(int pd = 0; pd<=100; pd+=10){
-//		arrayMicoBenchmarkRun_bp(accessPattern, pd);
-		arrayMicoBenchmarkRun_pp(accessPattern, pd);
-		printf("\n");
-	}
+	return accessPattern;
 }
 
-void linkedListMicoBenchmarkRun_np(vector<pair<uint64_t, uint64_t>> &accessPattern){
-	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-	Memory memory(&cache, nullptr);
-
-	for(int i=0; i<accessPattern.size(); i++){
-		memory.access(accessPattern[i].first, accessPattern[i].second);
-	}
-
-	printf("Linked List MicroBenchmark No Prefetcher\n");
-	memory.printStats();
-
-}
-
-
-void linkedListMicoBenchmarkRun_bp(vector<pair<uint64_t, uint64_t>> &accessPattern, int prefetchDegree){
-	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-	LinkedListPrefetcher llPrefetcher(prefetchDegree, PREFETCHER_GHB_SIZE);
-    Memory memory(&cache, &llPrefetcher);
-
-	for(int i=0; i<accessPattern.size(); i++){
-		memory.access(accessPattern[i].first, accessPattern[i].second);
-	}
-
-	printf("Linked List MicroBenchmark with Block PD: %d\n", prefetchDegree);
-	memory.printStats();
-
-}
-
-
-void linkedListMicoBenchmarkRun_pp(vector<pair<uint64_t, uint64_t>> &accessPattern, int prefetchDegree){
-	LRUCache ramCache(RAM_CACHE_SIZE, RAM_CACHE_BLOCK_SIZE, RAM_CACHE_ASSOCIATIVITY);
-    Memory ram(&ramCache, nullptr);
-
-	LRUCache cache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
-	LinkedListPrefetcher llPrefetcher(prefetchDegree, PREFETCHER_GHB_SIZE);
-    Memory memory(&cache, &llPrefetcher, &ram, true);
-
-	for(int i=0; i<accessPattern.size(); i++){
-		memory.access(accessPattern[i].first, accessPattern[i].second);
-	}
-
-	printf("Linked List MicroBenchmark with Page PD: %d\n", prefetchDegree);
-	memory.printStats();
-
-}
-
-void linkedListMicroBenchmark(){
+vector<pair<uint64_t, uint64_t>> getLinkedListMicroBenchmark(){
 	const int LINKED_LIST_SIZE = 100000;
 	const int NODE_SIZE = 100;
 	void* addressess[LINKED_LIST_SIZE];
@@ -264,10 +171,59 @@ void linkedListMicroBenchmark(){
 			accessPattern.push_back( make_pair(0, *it) );
 		}
 
-//		linkedListMicoBenchmarkRun_np(accessPattern);
-		for(int pd = 0; pd<=50; pd+=5){
-			linkedListMicoBenchmarkRun_bp(accessPattern, pd);
-//			linkedListMicoBenchmarkRun_pp(accessPattern, pd);
-			printf("\n");
-		}
+	return accessPattern;
+}
+
+
+void runMicroBenchmark(string fileName, int prefetchDegree, int prefetchingAlgo, int isPagePrediction){
+	vector<pair<uint64_t, uint64_t>> accessPattern;
+	Memory *memory, *ram;
+	Prefetcher *prefetcher;
+	LRUCache *cache, *ramCache;
+
+	ram = NULL;
+	ramCache = NULL;
+
+	cache = new LRUCache(L2_CACHE_SIZE, L2_CACHE_BLOCK_SIZE, L2_CACHE_ASSOCIATIVITY);
+
+	switch(prefetchingAlgo){
+		case 0:
+			prefetcher = new ConstStrideArrayPrefetcher(prefetchDegree, PREFETCHER_NUM_PC);
+			break;
+		case 1:
+			prefetcher = new LinkedListPrefetcher(prefetchDegree, PREFETCHER_GHB_SIZE);
+			break;
+	}
+
+	if(!isPagePrediction){ /* Block Prediction */
+		memory = new Memory(cache, prefetcher);
+	}else{ /* Page Prediction */
+		ramCache = new LRUCache(RAM_CACHE_SIZE, RAM_CACHE_BLOCK_SIZE, RAM_CACHE_ASSOCIATIVITY);
+		ram = new Memory(ramCache, nullptr);
+
+		memory = new Memory(cache, prefetcher, ram, true);
+	}
+
+	if(fileName.find("linkedlist") != string::npos){
+		accessPattern = getLinkedListMicroBenchmark();
+	}else if(fileName.find("array") != string::npos){
+		accessPattern = getArrayMicroBenchmark();
+	}else{
+		printf("ERROR: Invalid MicroBenchmark specified\n");
+		exit(-1);
+	}
+
+
+	for(int i=0; i<accessPattern.size(); i++){
+		memory->access(accessPattern[i].first, accessPattern[i].second);
+	}
+
+	memory->minPrintStats();
+
+	/* Free Memory */
+	delete prefetcher;
+	delete memory;
+	delete cache;
+	delete ram;
+	delete ramCache;
 }
