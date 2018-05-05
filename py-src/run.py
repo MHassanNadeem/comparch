@@ -12,10 +12,15 @@ CPP_MODEL_PATH = os.path.abspath( '../cpp-src/main.bin' )
 
 def runBenchmark(fileName, pdRange, prefetchingAlgoRange, isPagePredictionRange):
     results = []
+    thread_error = []
     thread_list = []
 
     def run(pd, prefetchingAlgo, isPagePrediction):
-        res = subprocess.check_output([CPP_MODEL_PATH, fileName, str(pd), str(prefetchingAlgo), str(isPagePrediction)])
+        try:
+            res = subprocess.check_output([CPP_MODEL_PATH, fileName, str(pd), str(prefetchingAlgo), str(isPagePrediction)])
+        except:
+            thread_error.append(True)
+            sys.exit("ERROR: CPP Model returned with error")
         res = res.strip().split()
         resDict = {
             "pd":pd,
@@ -46,14 +51,23 @@ def runBenchmark(fileName, pdRange, prefetchingAlgoRange, isPagePredictionRange)
     for thread in thread_list:
         thread.join()
 
+    # Check errors
+    if any(thread_error):
+        sys.exit("ERROR: Some threads exited with error")
+
     return results
+
+# A hacky way to run microbenchmarks :(
+def isMicroBenchmark(fileName):
+    fileName = os.path.split(fileName)[-1]
+    return fileName.find('MICRO') != 1
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         filePath = os.path.abspath( sys.argv[1] )
         fileName = os.path.split(filePath)[-1]
 
-        if not os.path.isfile(filePath):
+        if not os.path.isfile(filePath) and not isMicroBenchmark(filePath):
             sys.exit("ERROR: File {0} does not exist".format(filePath))
 
         if not os.path.isfile(CPP_MODEL_PATH):
@@ -61,7 +75,7 @@ if __name__ == "__main__":
 
 
         start_time = time.time()
-        results = runBenchmark(filePath, range(0,160,10), [0,1], [0,1])
+        results = runBenchmark(filePath if not isMicroBenchmark(filePath) else fileName, range(0,160,10), [0,1], [0,1])
         elapsed_time = time.time() - start_time
 
         # Arrange results
