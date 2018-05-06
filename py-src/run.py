@@ -60,7 +60,7 @@ def runBenchmark(fileName, pdRange, prefetchingAlgoRange, isPagePredictionRange)
 # A hacky way to run microbenchmarks :(
 def isMicroBenchmark(fileName):
     fileName = os.path.split(fileName)[-1]
-    return fileName.find('MICRO') != 1
+    return 'MICRO' in fileName
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
         # Save results to file
         time = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-        with open('{0}-{1}.json'.format(fileName, time), 'w') as outfile:
+        with open('{0}.json'.format(fileName), 'w') as outfile:
             json.dump(output, outfile, indent=4, sort_keys=True)
     else:
         sys.exit("ERROR: Benchmark file not specified")
