@@ -179,29 +179,49 @@ vector<pair<uint64_t, uint64_t>> getLinkedListMicroBenchmark(){
 
 	/* Generate unique random addresses */
 	for(int i=0; i<LINKED_LIST_SIZE; i++){
-		addresses.insert( rand() );
+		addresses.insert( rand()*L2_CACHE_BLOCK_SIZE );
 	}
 
 	/* populate accessPattern array with pc and addr */
-		for(auto it=addresses.begin(); it!=addresses.end(); ++it){
-			accessPattern.push_back( make_pair(0, *it) );
-//			cout<<"++++ "<<(*it)/L2_CACHE_BLOCK_SIZE<<endl;
-		}
+	/* Iterate over the linked list */
+	for(auto it=addresses.begin(); it!=addresses.end(); ++it){
+		accessPattern.push_back( make_pair(0, *it) );
+	}
 
-		/* Add noise so that some of the cached linked list is evicted */
-//		for(uint64_t i=(long)RAND_MAX+5,j=0; i<(UINT64_MAX-L2_CACHE_BLOCK_SIZE) && j<L2_CACHE_SIZE/L2_CACHE_BLOCK_SIZE; i+=L2_CACHE_BLOCK_SIZE,j++){
-//			accessPattern.push_back( make_pair(0, i) );
-//		}
-
-		for(auto it=addresses.begin(); it!=addresses.end(); ++it){
-			accessPattern.push_back( make_pair(0, *it) );
-		}
+	/* Iterate over the same list one more time */
+	for(auto it=addresses.begin(); it!=addresses.end(); ++it){
+		accessPattern.push_back( make_pair(0, *it) );
+	}
 
 	return accessPattern;
 }
 
 vector<pair<uint64_t, uint64_t>> getBadLinkedListMicroBenchmark(){
+	const int LINKED_LIST_SIZE = 100000;
+	const int NODE_SIZE = 100;
+	void* addressess[LINKED_LIST_SIZE];
+	set<uint64_t> addresses;
+
 	vector<pair<uint64_t, uint64_t>> accessPattern;
+
+	/* Generate unique random addresses */
+	for(int i=0; i<LINKED_LIST_SIZE; i++){
+		addresses.insert( rand()*L2_CACHE_BLOCK_SIZE );
+	}
+
+	/* populate accessPattern array with pc and addr */
+	/* Iterate over the linked list */
+	for(auto it=addresses.begin(); it!=addresses.end(); ++it){
+		accessPattern.push_back( make_pair(0, *it) );
+	}
+
+	/* Time to mess up the linkedlist prefetcher */
+	/* Access linked list in such a way that none of the prefetched blocks are used */
+	uint64_t size = accessPattern.size();
+
+	for(int i=0; i<size; i+=200){
+		accessPattern.push_back( accessPattern[i] );
+	}
 
 	return accessPattern;
 }
