@@ -114,6 +114,14 @@ void runBenchmark(string fileName, int prefetchDegree, int prefetchingAlgo, int 
 /**************************************************************************************/
 /**************************************************************************************/
 
+void addRandomAccesses(vector<pair<uint64_t, uint64_t>> &accessPattern){
+	uint64_t NUM_BLOCKS = L2_CACHE_SIZE/L2_CACHE_BLOCK_SIZE;
+	uint64_t START = 0xFFFFFFFFFFFFFFFF;
+	for(int i=0; i<NUM_BLOCKS; i++){
+		accessPattern.push_back( make_pair(rand(), START-(64LLU*i)) );
+	}
+}
+
 vector<pair<uint64_t, uint64_t>> getArrayMicroBenchmark(){
 	vector<pair<uint64_t, uint64_t>> accessPattern;
 
@@ -139,6 +147,24 @@ vector<pair<uint64_t, uint64_t>> getArrayMicroBenchmark(){
 			accessPattern.push_back( make_pair(testData[i].pc, testData[i].startAddress + j*testData[i].stride) );
 		}
 	}
+
+	return accessPattern;
+}
+
+vector<pair<uint64_t, uint64_t>> getBadArrayMicroBenchmark(){
+	vector<pair<uint64_t, uint64_t>> accessPattern;
+
+	const uint64_t STRIDE = L2_CACHE_BLOCK_SIZE;
+
+	for(int pc=1; pc<10000; pc++){
+		uint64_t address = pc*10000;
+		accessPattern.push_back( make_pair(pc, address) );
+		accessPattern.push_back( make_pair(pc, address+STRIDE) );
+		accessPattern.push_back( make_pair(pc, address+STRIDE+STRIDE) );
+		// accessPattern.push_back( make_pair(pc, address+STRIDE+STRIDE+STRIDE) );
+	}
+
+	// addRandomAccesses(accessPattern);
 
 	return accessPattern;
 }
@@ -174,6 +200,12 @@ vector<pair<uint64_t, uint64_t>> getLinkedListMicroBenchmark(){
 	return accessPattern;
 }
 
+vector<pair<uint64_t, uint64_t>> getBadLinkedListMicroBenchmark(){
+	vector<pair<uint64_t, uint64_t>> accessPattern;
+
+	return accessPattern;
+}
+
 
 void runMicroBenchmark(string fileName, int prefetchDegree, int prefetchingAlgo, int isPagePrediction){
 	vector<pair<uint64_t, uint64_t>> accessPattern;
@@ -204,10 +236,14 @@ void runMicroBenchmark(string fileName, int prefetchDegree, int prefetchingAlgo,
 		memory = new Memory(cache, prefetcher, ram, true);
 	}
 
-	if(fileName.find("linkedlist") != string::npos){
+	if(fileName.find("linkedlist+") != string::npos){
 		accessPattern = getLinkedListMicroBenchmark();
-	}else if(fileName.find("array") != string::npos){
+	}else if(fileName.find("linkedlist-") != string::npos){
+		accessPattern = getBadLinkedListMicroBenchmark();
+	}else if(fileName.find("array+") != string::npos){
 		accessPattern = getArrayMicroBenchmark();
+	}else if(fileName.find("array-") != string::npos){
+		accessPattern = getBadArrayMicroBenchmark();
 	}else{
 		printf("ERROR: Invalid MicroBenchmark specified\n");
 		exit(-1);
