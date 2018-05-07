@@ -157,7 +157,7 @@ vector<pair<uint64_t, uint64_t>> getBadArrayMicroBenchmark(){
 	const uint64_t STRIDE = L2_CACHE_BLOCK_SIZE;
 
 	for(int pc=1; pc<10000; pc++){
-		uint64_t address = pc*10000;
+		uint64_t address = pc*100000;
 		accessPattern.push_back( make_pair(pc, address) );
 		accessPattern.push_back( make_pair(pc, address+STRIDE) );
 		accessPattern.push_back( make_pair(pc, address+STRIDE+STRIDE) );
