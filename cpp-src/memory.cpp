@@ -117,6 +117,11 @@ void Memory::printStats(){
 }
 
 void Memory::minPrintStats(){
+	if(lowerMemory){
+		lowerMemory->minPrintStats();
+		return;
+	}
+
 	cout<<numCacheHits<<" ";
 	cout<<numCacheMisses<<" ";
 	cout<<getHitRate()<<" ";
