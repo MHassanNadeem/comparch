@@ -12,6 +12,8 @@
 #include <time.h>
 #include <utility>
 
+#define VERSION "0.1.0"
+
 #define NUM_BYTES_IN_MB 		1048576LU
 
 #define L2_CACHE_SIZE			2*NUM_BYTES_IN_MB
@@ -33,6 +35,11 @@ void runMicroBenchmark(string fileName, int prefetchDegree, int prefetchingAlgo,
 int main(int argc, char *argv[]){
 	time_t t;
 	srand((unsigned) time(&t));
+
+	if(argc == 2 && strcmp(argv[1],"version")==0){
+		cout<<"version = "<<VERSION<<endl;
+		exit(0);
+	}
 
 	/*
 	1 - Name of benchmark file
