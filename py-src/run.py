@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
 
         start_time = time.time()
-        results = runBenchmark(filePath if not isMicroBenchmark(filePath) else fileName, range(0,160,10), [0,1], [0,1])
+        results = runBenchmark(filePath if not isMicroBenchmark(filePath) else fileName, [10, 20, 50, 100, 150], [0,1], [0,1])
         elapsed_time = time.time() - start_time
 
         # Arrange results
