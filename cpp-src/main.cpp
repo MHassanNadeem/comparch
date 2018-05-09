@@ -12,7 +12,7 @@
 #include <time.h>
 #include <utility>
 
-#define VERSION "0.1.0"
+#define VERSION "0.1.1"
 
 #define NUM_BYTES_IN_MB 		1048576LU
 
@@ -143,13 +143,13 @@ vector<pair<uint64_t, uint64_t>> getArrayMicroBenchmark(){
 		{1, 1000000000, 100000, 32},
 		{2, 2000000000, 100000, 40},
 		{3, 3000000000, 100000, 48},
-		{4, 4000000000, 100000, 80},
-		{5, 5000000000, 100000, 88},
-		{6, 6000000000, 100000, 104}
+		// {4, 4000000000, 100000, 80},
+		// {5, 5000000000, 100000, 88},
+		// {6, 6000000000, 100000, 104}
 	};
 
 
-	for(int i=0; i<6; i++){
+	for(int i=0; i<3; i++){
 		for(int j=0; j<testData[i].arraySize; j++){
 			accessPattern.push_back( make_pair(testData[i].pc, testData[i].startAddress + j*testData[i].stride) );
 		}
@@ -171,7 +171,7 @@ vector<pair<uint64_t, uint64_t>> getBadArrayMicroBenchmark(){
 		// accessPattern.push_back( make_pair(pc, address+STRIDE+STRIDE+STRIDE) );
 	}
 
-	// addRandomAccesses(accessPattern);
+	addRandomAccesses(accessPattern);
 
 	return accessPattern;
 }
